@@ -133,7 +133,7 @@ with open("/home/pi/METARMap/airports") as f:
         airports = f.readlines()
 airports = [x.strip() for x in airports]
 try:
-        with open("/home/pi/displayairports") as f2:
+        with open("/home/pi/METARMap/displayairports") as f2:
                 displayairports = f2.readlines()
         displayairports = [x.strip() for x in displayairports]
         print("Using subset airports for LED display")
