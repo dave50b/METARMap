@@ -161,22 +161,22 @@ conditionDict = { "NULL": {"flightCategory" : "", "windDir": "", "windSpeed" : 0
 conditionDict.pop("NULL")
 stationList = []
 for metar in root.iter('METAR'):
-        stationId = metar.find('station_id').text
-        if metar.find('flight_category') is None:
-                print("Missing flight condition, skipping.")
-                continue
-        flightCategory = metar.find('flight_category').text
-        windDir = ""
-        windSpeed = 0
-        windGustSpeed = 0
-        windGust = False
-        lightning = False
-        tempC = 0
-        dewpointC = 0
-        vis = 0
-        altimHg = 0.0
-        obs = ""
-        skyConditions = []
+	stationId = metar.find('station_id').text
+	if metar.find('flight_category') is None:
+		print("Missing flight condition, skipping.")
+		continue
+	flightCategory = metar.find('flight_category').text
+	windDir = ""
+	windSpeed = 0
+	windGustSpeed = 0
+	windGust = False
+	lightning = False
+	tempC = 0
+	dewpointC = 0
+	vis = 0
+	altimHg = 0.0
+	obs = ""
+	skyConditions = []
 	if metar.find('wind_gust_kt') is not None:
 		windGustSpeed = int(metar.find('wind_gust_kt').text)
 		windGust = (True if (ALWAYS_BLINK_FOR_GUSTS or windGustSpeed > WIND_BLINK_THRESHOLD) else False)
@@ -204,18 +204,18 @@ for metar in root.iter('METAR'):
 	if metar.find('raw_text') is not None:
 		rawText = metar.find('raw_text').text
 		lightning = False if ((rawText.find('LTG', 4) == -1 and rawText.find('TS', 4) == -1) or rawText.find('TSNO', 4) != -1) else True
-        print(stationId + ":"
-        + flightCategory + ":"
-        + str(windDir) + "@" + str(windSpeed) + ("G" + str(windGustSpeed) if windGust else "") + ":"
-        + str(vis) + "SM:"
-        + obs + ":"
-        + str(tempC) + "/"
-        + str(dewpointC) + ":"
-        + str(altimHg) + ":"
-        + str(lightning))
-        conditionDict[stationId] = { "flightCategory" : flightCategory, "windDir": windDir, "windSpeed" : windSpeed, "windGustSpeed": windGustSpeed, "windGust": windGust, "vis": vis, "obs" : obs, "tempC" : tempC, "dewpointC" : dewpointC, "altimHg" : altimHg, "lightning": lightning, "skyConditions" : skyConditions, "obsTime": obsTime }
-        if displayairports is None or stationId in displayairports:
-                stationList.append(stationId)
+	print(stationId + ":" 
+	+ flightCategory + ":" 
+	+ str(windDir) + "@" + str(windSpeed) + ("G" + str(windGustSpeed) if windGust else "") + ":"
+	+ str(vis) + "SM:"
+	+ obs + ":"
+	+ str(tempC) + "/"
+	+ str(dewpointC) + ":"
+	+ str(altimHg) + ":"
+	+ str(lightning))
+	conditionDict[stationId] = { "flightCategory" : flightCategory, "windDir": windDir, "windSpeed" : windSpeed, "windGustSpeed": windGustSpeed, "windGust": windGust, "vis": vis, "obs" : obs, "tempC" : tempC, "dewpointC" : dewpointC, "altimHg" : altimHg, "lightning": lightning, "skyConditions" : skyConditions, "obsTime": obsTime }
+	if displayairports is None or stationId in displayairports:
+		stationList.append(stationId)
 
 # Start up external display output
 disp = None
