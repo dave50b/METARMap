@@ -177,33 +177,33 @@ for metar in root.iter('METAR'):
         altimHg = 0.0
         obs = ""
         skyConditions = []
-        if metar.find('wind_gust_kt') is not None:
-	   windGustSpeed = int(metar.find('wind_gust_kt').text)
-	   windGust = (True if (ALWAYS_BLINK_FOR_GUSTS or windGustSpeed > WIND_BLINK_THRESHOLD) else False)
-        if metar.find('wind_speed_kt') is not None:
-            windSpeed = int(metar.find('wind_speed_kt').text)
-        if metar.find('wind_dir_degrees') is not None:
-            windDir = metar.find('wind_dir_degrees').text
-        if metar.find('temp_c') is not None:
-            tempC = int(round(float(metar.find('temp_c').text)))
-        if metar.find('dewpoint_c') is not None:
-            dewpointC = int(round(float(metar.find('dewpoint_c').text)))
-        if metar.find('visibility_statute_mi') is not None:
-            vis_str = metar.find('visibility_statute_mi').text
-            vis_str = vis_str.replace('+', '')
-            vis = int(round(float(vis_str)))
-        if metar.find('altim_in_hg') is not None:
-            altimHg = float(round(float(metar.find('altim_in_hg').text), 2))
-        if metar.find('wx_string') is not None:
-            obs = metar.find('wx_string').text
-        if metar.find('observation_time') is not None:
-            obsTime = datetime.datetime.fromisoformat(metar.find('observation_time').text.replace("Z","+00:00"))
-        for skyIter in metar.iter("sky_condition"):
-            skyCond = { "cover" : skyIter.get("sky_cover"), "cloudBaseFt": int(skyIter.get("cloud_base_ft_agl", default=0)) }
-            skyConditions.append(skyCond)
-        if metar.find('raw_text') is not None:
-            rawText = metar.find('raw_text').text
-            lightning = False if ((rawText.find('LTG', 4) == -1 and rawText.find('TS', 4) == -1) or rawText.find('TSNO', 4) != -1) else True
+	if metar.find('wind_gust_kt') is not None:
+		windGustSpeed = int(metar.find('wind_gust_kt').text)
+		windGust = (True if (ALWAYS_BLINK_FOR_GUSTS or windGustSpeed > WIND_BLINK_THRESHOLD) else False)
+	if metar.find('wind_speed_kt') is not None:
+		windSpeed = int(metar.find('wind_speed_kt').text)
+	if metar.find('wind_dir_degrees') is not None:
+		windDir = metar.find('wind_dir_degrees').text
+	if metar.find('temp_c') is not None:
+		tempC = int(round(float(metar.find('temp_c').text)))
+	if metar.find('dewpoint_c') is not None:
+		dewpointC = int(round(float(metar.find('dewpoint_c').text)))
+	if metar.find('visibility_statute_mi') is not None:
+		vis_str = metar.find('visibility_statute_mi').text
+		vis_str = vis_str.replace('+', '')
+		vis = int(round(float(vis_str)))
+	if metar.find('altim_in_hg') is not None:
+		altimHg = float(round(float(metar.find('altim_in_hg').text), 2))
+	if metar.find('wx_string') is not None:
+		obs = metar.find('wx_string').text
+	if metar.find('observation_time') is not None:
+		obsTime = datetime.datetime.fromisoformat(metar.find('observation_time').text.replace("Z","+00:00"))
+	for skyIter in metar.iter("sky_condition"):
+		skyCond = { "cover" : skyIter.get("sky_cover"), "cloudBaseFt": int(skyIter.get("cloud_base_ft_agl", default=0)) }
+		skyConditions.append(skyCond)
+	if metar.find('raw_text') is not None:
+		rawText = metar.find('raw_text').text
+		lightning = False if ((rawText.find('LTG', 4) == -1 and rawText.find('TS', 4) == -1) or rawText.find('TSNO', 4) != -1) else True
         print(stationId + ":"
         + flightCategory + ":"
         + str(windDir) + "@" + str(windSpeed) + ("G" + str(windGustSpeed) if windGust else "") + ":"
