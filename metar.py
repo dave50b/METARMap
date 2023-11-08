@@ -178,8 +178,8 @@ for metar in root.iter('METAR'):
         obs = ""
         skyConditions = []
         if metar.find('wind_gust_kt') is not None:
-		windGustSpeed = int(metar.find('wind_gust_kt').text)
-		windGust = (True if (ALWAYS_BLINK_FOR_GUSTS or windGustSpeed > WIND_BLINK_THRESHOLD) else False)
+	   windGustSpeed = int(metar.find('wind_gust_kt').text)
+	   windGust = (True if (ALWAYS_BLINK_FOR_GUSTS or windGustSpeed > WIND_BLINK_THRESHOLD) else False)
         if metar.find('wind_speed_kt') is not None:
             windSpeed = int(metar.find('wind_speed_kt').text)
         if metar.find('wind_dir_degrees') is not None:
