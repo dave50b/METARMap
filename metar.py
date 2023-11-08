@@ -129,11 +129,11 @@ print("External Display:" + str(ACTIVATE_EXTERNAL_METAR_DISPLAY))
 pixels = neopixel.NeoPixel(LED_PIN, LED_COUNT, brightness = LED_BRIGHTNESS_DIM if (ACTIVATE_DAYTIME_DIMMING and bright == False) else LED_BRIGHTNESS, pixel_order = LED_ORDER, auto_write = False)
 
 # Read the airports file to retrieve list of airports and use as order for LEDs
-with open("/home/pi/METARMap/airports") as f:
+with open("/home/pi/airports") as f:
         airports = f.readlines()
 airports = [x.strip() for x in airports]
 try:
-        with open("/home/pi/METARMap/displayairports") as f2:
+        with open("/home/pi/displayairports") as f2:
                 displayairports = f2.readlines()
         displayairports = [x.strip() for x in displayairports]
         print("Using subset airports for LED display")
@@ -141,9 +141,15 @@ except IOError:
         print("Rotating through all airports on LED display")
         displayairports = None
 
+if len(airports) > LED_COUNT:
+	print()
+	print("WARNING: Too many airports in airports file, please increase LED_COUNT or reduce the number of airports")
+	print("Airports: " + str(len(airports)) + " LED_COUNT: " + str(LED_COUNT))
+	print()
+	quit()
+
 # Retrieve METAR from aviationweather.gov data server
 # Details about parameters can be found here: https://www.aviationweather.gov/dataserver/example?datatype=metar
-#url = "https://www.aviationweather.gov/adds/dataserver_current/httpparam?dataSource=metars&requestType=retrieve&format=xml&hoursBeforeNow=5&mostRecentForEachStation=true&stationString=" + ",".join([item for item in airports if item != "NULL"])
 url = "https://aviationweather.gov/cgi-bin/data/dataserver.php?requestType=retrieve&dataSource=metars&stationString=" + ",".join([item for item in airports if item != "NULL"]) + "&hoursBeforeNow=5&format=xml&mostRecent=true&mostRecentForEachStation=constraint"
 print(url)
 req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36 Edg/86.0.622.69'})
@@ -172,30 +178,32 @@ for metar in root.iter('METAR'):
         obs = ""
         skyConditions = []
         if metar.find('wind_gust_kt') is not None:
-                windGustSpeed = int(metar.find('wind_gust_kt').text)
-                windGust = (True if (ALWAYS_BLINK_FOR_GUSTS or windGustSpeed > WIND_BLINK_THRESHOLD) else False)
+		windGustSpeed = int(metar.find('wind_gust_kt').text)
+		windGust = (True if (ALWAYS_BLINK_FOR_GUSTS or windGustSpeed > WIND_BLINK_THRESHOLD) else False)
         if metar.find('wind_speed_kt') is not None:
-                windSpeed = int(metar.find('wind_speed_kt').text)
+            windSpeed = int(metar.find('wind_speed_kt').text)
         if metar.find('wind_dir_degrees') is not None:
-                windDir = metar.find('wind_dir_degrees').text
+            windDir = metar.find('wind_dir_degrees').text
         if metar.find('temp_c') is not None:
-                tempC = int(round(float(metar.find('temp_c').text)))
+            tempC = int(round(float(metar.find('temp_c').text)))
         if metar.find('dewpoint_c') is not None:
-                dewpointC = int(round(float(metar.find('dewpoint_c').text)))
+            dewpointC = int(round(float(metar.find('dewpoint_c').text)))
         if metar.find('visibility_statute_mi') is not None:
-                vis = int(round(float(metar.find('visibility_statute_mi').text)))
+            vis_str = metar.find('visibility_statute_mi').text
+            vis_str = vis_str.replace('+', '')
+            vis = int(round(float(vis_str)))
         if metar.find('altim_in_hg') is not None:
-                altimHg = float(round(float(metar.find('altim_in_hg').text), 2))
+            altimHg = float(round(float(metar.find('altim_in_hg').text), 2))
         if metar.find('wx_string') is not None:
-                obs = metar.find('wx_string').text
+            obs = metar.find('wx_string').text
         if metar.find('observation_time') is not None:
-                obsTime = datetime.datetime.fromisoformat(metar.find('observation_time').text.replace("Z","+00:00"))
+            obsTime = datetime.datetime.fromisoformat(metar.find('observation_time').text.replace("Z","+00:00"))
         for skyIter in metar.iter("sky_condition"):
-                skyCond = { "cover" : skyIter.get("sky_cover"), "cloudBaseFt": int(skyIter.get("cloud_base_ft_agl", default=0)) }
-                skyConditions.append(skyCond)
+            skyCond = { "cover" : skyIter.get("sky_cover"), "cloudBaseFt": int(skyIter.get("cloud_base_ft_agl", default=0)) }
+            skyConditions.append(skyCond)
         if metar.find('raw_text') is not None:
-                rawText = metar.find('raw_text').text
-                lightning = False if ((rawText.find('LTG', 4) == -1 and rawText.find('TS', 4) == -1) or rawText.find('TSNO', 4) != -1) else True
+            rawText = metar.find('raw_text').text
+            lightning = False if ((rawText.find('LTG', 4) == -1 and rawText.find('TS', 4) == -1) or rawText.find('TSNO', 4) != -1) else True
         print(stationId + ":"
         + flightCategory + ":"
         + str(windDir) + "@" + str(windSpeed) + ("G" + str(windGustSpeed) if windGust else "") + ":"
